@@ -56,6 +56,8 @@ class OptParser
     end
   end
 
+  alias add on
+
   # Same as `on` however is does exit after the block has been called.
   #
   # @return [ Void ]
