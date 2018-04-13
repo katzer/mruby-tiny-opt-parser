@@ -60,7 +60,8 @@ class OptParser
   #
   # @return [ Void ]
   def on!(opt, type = :string, dval = nil)
-    raise 'OptParser#on! requires mruby-exit.' unless methods.include? :exit
+    raise 'OptParser#on! requires mruby-exit.'  unless methods.include? :exit
+    raise 'OptParser#on! requires mruby-print.' unless methods.include? :puts
 
     on(opt, type, dval) do |val|
       puts yield(val) && exit if flag_given? opt.to_s
