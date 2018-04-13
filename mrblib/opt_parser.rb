@@ -34,11 +34,6 @@ class OptParser
     yield(self) if block_given?
   end
 
-  # List of all registered options.
-  #
-  # @return [ Array<String> ]
-  attr_accessor :opts
-
   # Add a flag and a callback to invoke if flag is given later.
   #
   # @param [ String ] flag The name of the option value.
@@ -52,7 +47,7 @@ class OptParser
     if opt == :unknown
       @unknown = blk
     else
-      opts[opt.to_s] = [type, dval, blk]
+      @opts[opt.to_s] = [type, dval, blk]
     end
   end
 
@@ -78,7 +73,7 @@ class OptParser
 
     @unknown.call(unknown_opts) if !ignore_unknown && unknown_opts.any?
 
-    opts.each do |opt, opts|
+    @opts.each do |opt, opts|
       type, dval, blk = opts
       blk.call opt_value(opt, type, dval)
     end
@@ -89,11 +84,11 @@ class OptParser
   # @param [ Array<String> ] args List of arguments to parse.
   #
   # @return [ Hash<String, String> ]
-  def getopts(args = nil)
+  def opts(args = nil)
     params = {}
     @args  = normalize_args(args) if args
 
-    opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, *opts[0, 2]) }
+    @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, *opts[0, 2]) }
 
     params
   end

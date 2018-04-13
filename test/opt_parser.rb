@@ -93,11 +93,11 @@ assert 'OptParser#parse', 'unknown flag' do
   assert_equal 8080, port
 end
 
-assert 'OptParser#getopts' do
+assert 'OptParser#opts' do
   parser = OptParser.new ['--port', '8000']
 
   parser.on(:port, :int, 80)
   parser.on(:version, :int, 1)
 
-  assert_equal({ port: 8000, version: 1 }, parser.getopts)
+  assert_equal({ port: 8000, version: 1 }, parser.opts)
 end

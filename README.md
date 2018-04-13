@@ -8,7 +8,7 @@ parser = OptParser.new do |opts|
   opts.on(:ip, :string, '127.0.0.1') { |ip| ... }
 end
 
-parser.getopts(['port', '8000'])
+parser.opts(['port', '8000'])
 # => { port: 8000, ip: '127.0.0.1' }
 
 parser.parse(['port', '8000', 'host', 'localhost'])
