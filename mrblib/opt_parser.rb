@@ -27,12 +27,17 @@ class OptParser
   #
   # @return [ OptParser ]
   def initialize(args = [])
-    @args    = normalize_args(args)
-    @opts    = {}
-    @unknown = ->(opts) { raise "unknown option: #{opts.join ', '}" }
+    @args, @tail = normalize_args(args)
+    @opts        = {}
+    @unknown     = ->(opts) { raise "unknown option: #{opts.join ', '}" }
 
     yield(self) if block_given?
   end
+
+  # The tail of the argument list.
+  #
+  # @return [ Array<String> ]
+  attr_reader :tail
 
   # Add a flag and a callback to invoke if flag is given later.
   #
@@ -69,13 +74,13 @@ class OptParser
   #
   # @return [ Void ]
   def parse(args = nil, ignore_unknown = false)
-    @args = normalize_args(args) if args
+    @args, @tail = normalize_args(args) if args
 
     @unknown.call(unknown_opts) if !ignore_unknown && unknown_opts.any?
 
     @opts.each do |opt, opts|
       type, dval, blk = opts
-      blk.call opt_value(opt, type, dval)
+      blk&.call opt_value(opt, type, dval)
     end
   end
 
@@ -85,8 +90,8 @@ class OptParser
   #
   # @return [ Hash<String, String> ]
   def opts(args = nil)
-    params = {}
-    @args  = normalize_args(args) if args
+    @args, @tail = normalize_args(args) if args
+    params       = {}
 
     @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, *opts[0, 2]) }
 
@@ -168,12 +173,22 @@ class OptParser
   #
   # @return [ Array<String> ]
   def normalize_args(args)
-    args.map do |opt|
-      if opt.to_s[0] != '-'
-        [opt]
+    list = []
+    tail = []
+    flag = false
+
+    args.each do |opt|
+      if opt.to_s[0] == '-'
+        list << opt[(opt[1] == '-' ? 2 : 1)..-1]
+        flag = false
+      elsif flag
+        tail << opt
       else
-        opt[(opt[1] == '-' ? 2 : 1)..-1]
+        list << [opt]
+        flag = true
       end
     end
+
+    [list.freeze, tail.freeze]
   end
 end

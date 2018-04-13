@@ -8,11 +8,10 @@ parser = OptParser.new do |opts|
   opts.on(:ip, :string, '127.0.0.1') { |ip| ... }
 end
 
-parser.opts(['port', '8000'])
-# => { port: 8000, ip: '127.0.0.1' }
+parser.parse(['--port', '8000', 'losthost', 'otherhost'])
 
-parser.parse(['port', '8000', 'host', 'localhost'])
-# RuntimeError: unknown option: host 
+parser.opts # => { port: 8000, ip: '127.0.0.1' }
+parser.tail # => ['losthost', 'otherhost']
 ```
 
 ## Installation
