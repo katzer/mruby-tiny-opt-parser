@@ -89,15 +89,10 @@ class OptParser
 
   # Returns a hash with all opts and their value.
   #
-  # @param [ Array<String> ] args List of arguments to parse.
-  #
   # @return [ Hash<String, String> ]
-  def opts(args = nil)
-    @args, @tail = normalize_args(args) if args
-    params       = {}
-
+  def opts
+    params = {}
     @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, *opts[0, 2]) }
-
     params
   end
 
@@ -111,6 +106,8 @@ class OptParser
   # If the specified flag is given in args list.
   #
   # @param [ String ] name The (long) flag name.
+  #
+  # @return [ Boolean ]
   def flag_given?(flag)
     @args.any? do |arg|
       if flag.length == 1 || arg.length == 1
@@ -124,6 +121,8 @@ class OptParser
   # If the specified flag is given in args list.
   #
   # @param [ String ] name The (long) flag name.
+  #
+  # @return [ Boolean ]
   def opt_given?(flag)
     if flag.length == 1
       @opts.keys.any? { |opt| opt[0] == flag[0] }
