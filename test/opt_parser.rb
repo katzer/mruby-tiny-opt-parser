@@ -20,6 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+assert 'OptParser#flag?' do
+  parser = OptParser.new
+  parser.add 'help'
+  parser.add 'version'
+
+  assert_true  parser.flag? 'help'
+  assert_true  parser.flag? 'v'
+  assert_false parser.flag? 'other'
+end
+
 assert 'OptParser#opt_given?' do
   parser = OptParser.new ['--help', '-v']
 
@@ -28,16 +38,6 @@ assert 'OptParser#opt_given?' do
   assert_true  parser.opt_given? 'version'
   assert_false parser.opt_given? 'hilfe'
   assert_false parser.opt_given? 'other'
-end
-
-assert 'OptParser#flag_given?' do
-  parser = OptParser.new
-  parser.add 'help'
-  parser.add 'version'
-
-  assert_true  parser.flag_given? 'help'
-  assert_true  parser.flag_given? 'v'
-  assert_false parser.flag_given? 'other'
 end
 
 assert 'OptParser#unknown_opts' do

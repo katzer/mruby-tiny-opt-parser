@@ -63,7 +63,7 @@ class OptParser
   # @return [ Void ]
   def on!(opt, type = :string, dval = nil)
     on(opt, type, dval) do |val|
-      if flag_given? opt.to_s
+      if flag? opt.to_s
         puts yield(val)
         exit
       end
@@ -100,7 +100,7 @@ class OptParser
   #
   # @return [ Array<String> ]
   def unknown_opts
-    @args.reject { |opt| !opt.is_a?(String) || flag_given?(opt) }
+    @args.reject { |opt| !opt.is_a?(String) || flag?(opt) }
   end
 
   # If the specified flag is given in opts list.
@@ -108,7 +108,7 @@ class OptParser
   # @param [ String ] name The (long) flag name.
   #
   # @return [ Boolean ]
-  def flag_given?(flag)
+  def flag?(flag)
     if flag.length == 1
       @opts.keys.any? { |opt| opt[0] == flag[0] }
     else
@@ -118,15 +118,15 @@ class OptParser
 
   # If the specified flag is given in args list.
   #
-  # @param [ String ] name The (long) flag name.
+  # @param [ String ] opt The (long) flag name.
   #
   # @return [ Boolean ]
-  def opt_given?(flag)
+  def opt_given?(opt)
     @args.any? do |arg|
-      if flag.length == 1 || arg.length == 1
-        true if arg[0] == flag[0]
+      if opt.length == 1 || arg.length == 1
+        true if arg[0] == opt[0]
       else
-        arg == flag
+        arg == opt
       end
     end
   end
