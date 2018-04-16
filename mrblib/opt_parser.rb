@@ -63,7 +63,7 @@ class OptParser
   # @return [ Void ]
   def on!(opt, type = :string, dval = nil)
     on(opt, type, dval) do |val|
-      if flag? opt.to_s
+      if opt_given? opt.to_s
         puts yield(val)
         exit
       end
