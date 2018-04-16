@@ -100,21 +100,19 @@ class OptParser
   #
   # @return [ Array<String> ]
   def unknown_opts
-    @args.reject { |opt| !opt.is_a?(String) || opt_given?(opt) }
+    @args.reject { |opt| !opt.is_a?(String) || flag_given?(opt) }
   end
 
-  # If the specified flag is given in args list.
+  # If the specified flag is given in opts list.
   #
   # @param [ String ] name The (long) flag name.
   #
   # @return [ Boolean ]
   def flag_given?(flag)
-    @args.any? do |arg|
-      if flag.length == 1 || arg.length == 1
-        true if arg[0] == flag[0]
-      else
-        arg == flag
-      end
+    if flag.length == 1
+      @opts.keys.any? { |opt| opt[0] == flag[0] }
+    else
+      @opts.include?(flag)
     end
   end
 
@@ -124,10 +122,12 @@ class OptParser
   #
   # @return [ Boolean ]
   def opt_given?(flag)
-    if flag.length == 1
-      @opts.keys.any? { |opt| opt[0] == flag[0] }
-    else
-      @opts.include?(flag)
+    @args.any? do |arg|
+      if flag.length == 1 || arg.length == 1
+        true if arg[0] == flag[0]
+      else
+        arg == flag
+      end
     end
   end
 

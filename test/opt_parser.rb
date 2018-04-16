@@ -20,45 +20,45 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-assert 'OptParser#flag_given?' do
-  parser = OptParser.new ['--help', '-v']
-
-  assert_true  parser.flag_given? 'help'
-  assert_true  parser.flag_given? 'h'
-  assert_true  parser.flag_given? 'version'
-  assert_false parser.flag_given? 'hilfe'
-  assert_false parser.flag_given? 'other'
-end
-
 assert 'OptParser#opt_given?' do
   parser = OptParser.new ['--help', '-v']
-  parser.on 'help'
-  parser.on 'version'
 
   assert_true  parser.opt_given? 'help'
-  assert_true  parser.opt_given? 'v'
+  assert_true  parser.opt_given? 'h'
+  assert_true  parser.opt_given? 'version'
+  assert_false parser.opt_given? 'hilfe'
   assert_false parser.opt_given? 'other'
+end
+
+assert 'OptParser#flag_given?' do
+  parser = OptParser.new
+  parser.add 'help'
+  parser.add 'version'
+
+  assert_true  parser.flag_given? 'help'
+  assert_true  parser.flag_given? 'v'
+  assert_false parser.flag_given? 'other'
 end
 
 assert 'OptParser#unknown_opts' do
   parser = OptParser.new ['help']
-  parser.on 'help'
+  parser.add 'help'
   assert_true parser.unknown_opts.empty?
 
   parser = OptParser.new ['--help']
-  parser.on 'help'
+  parser.add 'help'
   assert_true parser.unknown_opts.empty?
 
   parser = OptParser.new ['-h']
-  parser.on 'help'
+  parser.add 'help'
   assert_true parser.unknown_opts.empty?
 
   parser = OptParser.new ['-?']
-  parser.on 'help'
+  parser.add 'help'
   assert_include parser.unknown_opts, '?'
 
   parser = OptParser.new ['-p', '80']
-  parser.on 'port'
+  parser.add 'port'
   assert_true parser.unknown_opts.empty?
 end
 
