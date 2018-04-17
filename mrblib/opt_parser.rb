@@ -151,7 +151,7 @@ class OptParser
     @args.each_index { |i| index = i if opt[0] == @args[i][0] } unless index
     value = @args[index + 1] if index
 
-    return convert(dval, type) unless value
+    return dval unless value
 
     convert(value[0], type) if value[0] != '-'
   end
