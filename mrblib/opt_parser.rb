@@ -87,7 +87,7 @@ class OptParser
     @opts.each do |opt, opts|
       type, dval, blk    = opts
       val                = opt_value(opt, type, dval)
-      params[opt.to_sym] = val
+      params[opt.to_sym] = val unless val.nil?
 
       blk&.call(val)
     end
