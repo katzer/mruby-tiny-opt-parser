@@ -27,9 +27,10 @@ class OptParser
   #
   # @return [ OptParser ]
   def initialize(args = [])
-    @args, @tail = normalize_args(args)
-    @opts        = {}
-    @unknown     = ->(opts) { raise "unknown option: #{opts.join ', '}" }
+    normalize_args(args)
+
+    @opts    = {}
+    @unknown = ->(opts) { raise "unknown option: #{opts.join ', '}" }
 
     yield(self) if block_given?
   end
@@ -70,26 +71,33 @@ class OptParser
     end
   end
 
-  # Parse all given flag and invoke their callback.
+  # Parse all given flags and invoke their callback.
   #
   # @param [ Array<String> ] args List of arguments to parse.
   # @param [ Bool]           ignore_unknown
   #
-  # @return [ Void ]
+  # @return [ Hash<String, Object> ]
   def parse(args = nil, ignore_unknown = false)
-    @args, @tail = normalize_args(args) if args
+    params = {}
+
+    normalize_args(args) if args
 
     @unknown.call(unknown_opts) if !ignore_unknown && unknown_opts.any?
 
     @opts.each do |opt, opts|
-      type, dval, blk = opts
-      blk&.call opt_value(opt, type, dval)
+      type, dval, blk    = opts
+      val                = opt_value(opt, type, dval)
+      params[opt.to_sym] = val
+
+      blk&.call(val)
     end
+
+    params
   end
 
   # Returns a hash with all opts and their value.
   #
-  # @return [ Hash<String, String> ]
+  # @return [ Hash<String, Object> ]
   def opts
     params = {}
     @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, *opts[0, 2]) }
@@ -100,7 +108,7 @@ class OptParser
   #
   # @return [ Array<String> ]
   def unknown_opts
-    @args.reject { |opt| !opt.is_a?(String) || flag?(opt) }
+    @args.reject { |opt| !opt.is_a?(String) || valid_flag?(opt) }
   end
 
   # If the specified flag is given in opts list.
@@ -108,7 +116,7 @@ class OptParser
   # @param [ String ] name The (long) flag name.
   #
   # @return [ Boolean ]
-  def flag?(flag)
+  def valid_flag?(flag)
     if flag.length == 1
       @opts.keys.any? { |opt| opt[0] == flag[0] }
     else
@@ -173,24 +181,22 @@ class OptParser
   #
   # @param [ Array<String> ] args The arguments to normalize.
   #
-  # @return [ Array<String> ]
+  # @return [ Void ]
   def normalize_args(args)
-    list = []
-    tail = []
-    flag = false
+    @args = []
+    @tail = []
+    flag  = false
 
     args.each do |opt|
       if opt.to_s[0] == '-'
-        list << opt[(opt[1] == '-' ? 2 : 1)..-1]
+        @args << opt[(opt[1] == '-' ? 2 : 1)..-1]
         flag = false
       elsif flag
-        tail << opt
+        @tail << opt
       else
-        list << [opt]
+        @args << [opt]
         flag = true
       end
     end
-
-    [list.freeze, tail.freeze]
   end
 end

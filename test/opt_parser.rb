@@ -20,14 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-assert 'OptParser#flag?' do
+assert 'OptParser#valid_flag?' do
   parser = OptParser.new
   parser.add 'help'
   parser.add 'version'
 
-  assert_true  parser.flag? 'help'
-  assert_true  parser.flag? 'v'
-  assert_false parser.flag? 'other'
+  assert_true  parser.valid_flag? 'help'
+  assert_true  parser.valid_flag? 'v'
+  assert_false parser.valid_flag? 'other'
 end
 
 assert 'OptParser#opt_given?' do
@@ -72,7 +72,7 @@ assert 'OptParser#opt_value' do
   assert_equal '1.0.0', parser.opt_value('v', :string, '1.0.0')
 end
 
-assert 'OptParser#parse', 'unknown flag' do
+assert 'OptParser#parse' do
   parser = OptParser.new
   opts   = nil
   port   = nil
@@ -91,6 +91,7 @@ assert 'OptParser#parse', 'unknown flag' do
   assert_equal 80, port
   parser.parse(['--port', '8080'])
   assert_equal 8080, port
+  assert_equal({ port: 8080 }, parser.parse)
 end
 
 assert 'OptParser#opts' do
