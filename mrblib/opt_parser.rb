@@ -147,14 +147,14 @@ class OptParser
   #
   # @return [ Object ]
   def opt_value(opt, type = :any, dval = nil)
-    index = @args.index(opt)
-    @args.each_index { |i| index = i if opt[0] == @args[i][0] } unless index
-    value = @args[index + 1] if index
+    pos = @args.index(opt)
+    @args.each_index { |i| pos = i if !pos && opt[0] == @args[i][0] } unless pos
+    val = @args[pos + 1] if pos
 
-    case value
-    when Array then convert(value[0], type)
+    case val
+    when Array then convert(val[0], type)
     when nil   then dval
-    else convert(value, type)
+    else convert(val, type)
     end
   end
 
