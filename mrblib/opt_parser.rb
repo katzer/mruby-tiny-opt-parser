@@ -43,13 +43,13 @@ class OptParser
   # Add a flag and a callback to invoke if flag is given later.
   #
   # @param [ String ] flag The name of the option value.
-  #                        Possible values: any, string, int, float, bool
+  #                        Possible values: object, string, int, float, bool
   # @param [ Symbol ] type The type of the option v
   # @param [ Object ] dval The value to use if nothing else given.
   # @param [ Proc ]   blk  The callback to be invoked.
   #
   # @return [ Void ]
-  def on(opt, type = :string, dval = nil, &blk)
+  def on(opt, type = :object, dval = nil, &blk)
     if opt == :unknown
       @unknown = blk
     else
@@ -62,7 +62,7 @@ class OptParser
   # Same as `on` however is does exit after the block has been called.
   #
   # @return [ Void ]
-  def on!(opt, type = :string, dval = nil)
+  def on!(opt, type = :object, dval = nil)
     on(opt, type, dval) do |val|
       if opt_given? opt.to_s
         puts yield(val)
@@ -146,7 +146,7 @@ class OptParser
   # @param [ Object ] dval The default value to use for unless specified.
   #
   # @return [ Object ]
-  def opt_value(opt, type = :any, dval = nil)
+  def opt_value(opt, type = :object, dval = nil)
     pos = @args.index(opt)
     @args.each_index { |i| pos = i if !pos && opt[0] == @args[i][0] } unless pos
     val = @args[pos + 1] if pos
@@ -165,12 +165,12 @@ class OptParser
   #
   # @param [ Object ] val  The value to convert.
   # @param [ Symbol ] type The type to convert into.
-  #                        Possible values: any, string, int, float, bool
+  #                        Possible values: object, string, int, float, bool
   #
   # @return [ Object] The converted value.
   def convert(val, type)
     case type
-    when :any    then val
+    when :object then val
     when :string then val.to_s
     when :int    then val.to_i
     when :float  then val.to_f
