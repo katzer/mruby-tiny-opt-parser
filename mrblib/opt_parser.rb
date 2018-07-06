@@ -160,6 +160,8 @@ class OptParser
 
   private
 
+  # rubocop:disable CyclomaticComplexity
+
   # Convert the value into the specified type.
   # Raises an error for unknown type.
   #
@@ -179,25 +181,23 @@ class OptParser
     end
   end
 
+  # rubocop:enable CyclomaticComplexity
+
   # Removes all leading slashes or false friends from args.
   #
   # @param [ Array<String> ] args The arguments to normalize.
   #
   # @return [ Void ]
   def normalize_args(args)
-    @args = []
-    @tail = []
-    flag  = false
+    @args, @tail, flag = [], [], false
 
     args.each do |opt|
       if opt.to_s[0] == '-'
-        @args << opt[(opt[1] == '-' ? 2 : 1)..-1]
-        flag = false
+        @args << opt[(opt[1] == '-' ? 2 : 1)..-1] && flag = false
       elsif flag
         @tail << opt
       else
-        @args << [opt]
-        flag = true
+        @args << [opt] && flag = true
       end
     end
   end
