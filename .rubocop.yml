@@ -26,6 +26,9 @@ AllCops:
 Style/ParallelAssignment:
   Enabled: false
 
+Style/NumericPredicate:
+  EnforcedStyle: comparison
+
 Documentation:
   Enabled: false
 
