@@ -191,6 +191,8 @@ class OptParser
   def normalize_args(args)
     @args, @tail, flag = [], [], false
 
+    @tail = args.dup and return if args[0].to_s[0] != '-'
+
     args.each do |opt|
       if opt.to_s[0] == '-'
         @args << opt[(opt[1] == '-' ? 2 : 1)..-1] && flag = false

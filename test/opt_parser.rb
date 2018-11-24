@@ -108,5 +108,12 @@ assert 'OptParser#tail' do
   parser.on(:port, :int)
 
   assert_equal({ port: 80 }, parser.opts)
-  assert_equal([1, 2], parser.tail)
+  assert_equal [1, 2], parser.tail
+
+  parser = OptParser.new %w[port 80]
+  assert_equal({}, parser.opts)
+  assert_equal %w[port 80], parser.tail
+
+  parser = OptParser.new
+  assert_equal([], parser.tail)
 end
