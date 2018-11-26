@@ -153,7 +153,7 @@ class OptParser
 
     case val
     when Array then convert(val[0], type)
-    when nil   then dval
+    when nil   then pos && type == :bool ? true : dval
     else convert(val, type)
     end
   end

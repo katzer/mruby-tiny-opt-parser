@@ -68,7 +68,8 @@ assert 'OptParser#opt_value' do
   assert_equal '8000', parser.opt_value('port')
   assert_equal '8000', parser.opt_value('p')
   assert_equal '0.0.0.0', parser.opt_value('ip')
-  assert_nil parser.opt_value('v')
+  assert_nil   parser.opt_value('v')
+  assert_true  parser.opt_value('v', :bool, false)
   assert_equal '1.0.0', parser.opt_value('v', :string, '1.0.0')
 end
 
