@@ -22,6 +22,7 @@
 
 assert 'OptParser#valid_flag?' do
   parser = OptParser.new
+
   parser.add 'help'
   parser.add 'version'
 
@@ -31,7 +32,9 @@ assert 'OptParser#valid_flag?' do
 end
 
 assert 'OptParser#opt_given?' do
-  parser = OptParser.new ['--help', '-v']
+  parser = OptParser.new
+
+  parser.parse(['--help', '-v'], true)
 
   assert_true  parser.opt_given? 'help'
   assert_true  parser.opt_given? 'h'
@@ -41,29 +44,35 @@ assert 'OptParser#opt_given?' do
 end
 
 assert 'OptParser#unknown_opts' do
-  parser = OptParser.new ['help']
+  parser = OptParser.new
   parser.add 'help'
+  parser.parse(['help'])
   assert_true parser.unknown_opts.empty?
 
-  parser = OptParser.new ['--help']
+  parser = OptParser.new
   parser.add 'help'
+  parser.parse(['--help'])
   assert_true parser.unknown_opts.empty?
 
-  parser = OptParser.new ['-h']
+  parser = OptParser.new
   parser.add 'help'
+  parser.parse(['-h'])
   assert_true parser.unknown_opts.empty?
 
-  parser = OptParser.new ['-?']
+  parser = OptParser.new
   parser.add 'help'
+  parser.parse(['-?'], true)
   assert_include parser.unknown_opts, '?'
 
-  parser = OptParser.new ['-p', '80']
+  parser = OptParser.new
   parser.add 'port'
+  parser.parse(['-p', '80'])
   assert_true parser.unknown_opts.empty?
 end
 
 assert 'OptParser#opt_value' do
-  parser = OptParser.new ['--port', '8000', '--ip', '0.0.0.0', '-v']
+  parser = OptParser.new
+  parser.parse(['--port', '8000', '--ip', '0.0.0.0', '-v'], true)
 
   assert_equal '8000', parser.opt_value('port')
   assert_equal '8000', parser.opt_value('p')
@@ -92,29 +101,45 @@ assert 'OptParser#parse' do
   assert_equal 80, port
   parser.parse(['--port', '8080'])
   assert_equal 8080, port
-  assert_equal({ port: 8080 }, parser.parse)
+  assert_equal({ port: 8080 }, parser.opts)
 end
 
 assert 'OptParser#opts' do
-  parser = OptParser.new ['--port', '8000']
-
+  parser = OptParser.new
   parser.on(:port, :int, 80)
   parser.on(:version, :int, 1)
+  parser.parse(['--port', '8000'])
 
   assert_equal({ port: 8000, version: 1 }, parser.opts)
 end
 
 assert 'OptParser#tail' do
-  parser = OptParser.new ['--port', 80, 1, 2]
+  parser = OptParser.new
   parser.on(:port, :int)
-
+  parser.parse(['--port', 80, 1, 2])
   assert_equal({ port: 80 }, parser.opts)
   assert_equal [1, 2], parser.tail
 
-  parser = OptParser.new %w[port 80]
+  parser = OptParser.new
+  parser.parse(%w[port 80])
   assert_equal({}, parser.opts)
   assert_equal %w[port 80], parser.tail
 
   parser = OptParser.new
   assert_equal([], parser.tail)
+end
+
+assert 'OptParser#sample' do
+  parser = OptParser.new
+
+  parser.on(:pretty, :bool, false)
+  parser.on(:sort, :bool, false)
+  parser.on(:field, :string)
+
+  assert_true parser.parse(%w[-p])[:pretty]
+  assert_true parser.parse(%w[-p s t])[:pretty]
+
+  parser.parse(%w[-p -f id -s s t])
+  assert_equal({ pretty: true, field: 'id', sort: true }, parser.opts)
+  assert_equal(%w[s t], parser.tail)
 end

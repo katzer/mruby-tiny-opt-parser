@@ -20,16 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Parser for command line arguments.
 class OptParser
-  # Initialize the parser and check for unknown options.
-  #
-  # @param [ Array<String> ] args List of command-line arguments.
+  # Initialize the parser.
   #
   # @return [ OptParser ]
-  def initialize(args = [])
-    normalize_args(args)
+  def initialize
+    @flags, @opts, @tail = [], {}, []
 
-    @opts    = {}
     @unknown = ->(opts) { raise "unknown option: #{opts.join ', '}" }
 
     yield(self) if block_given?
@@ -53,7 +51,8 @@ class OptParser
     if opt == :unknown
       @unknown = blk
     else
-      @opts[opt.to_s] = [type, dval, blk]
+      @opts[flag = opt.to_s] = [type, dval, blk]
+      @flags << flag[0] if type == :bool
     end
   end
 
@@ -77,10 +76,10 @@ class OptParser
   # @param [ Bool]           ignore_unknown
   #
   # @return [ Hash<String, Object> ]
-  def parse(args = nil, ignore_unknown = false)
+  def parse(args, ignore_unknown = false)
     params = {}
 
-    normalize_args(args) if args
+    normalize_args(args)
 
     @unknown.call(unknown_opts) if !ignore_unknown && unknown_opts.any?
 
@@ -191,12 +190,11 @@ class OptParser
   def normalize_args(args)
     @args, @tail, flag = [], [], false
 
-    @tail = args.dup and return if args[0].to_s[0] != '-'
-
     args.each do |opt|
       if opt.to_s[0] == '-'
-        @args << opt[(opt[1] == '-' ? 2 : 1)..-1] && flag = false
-      elsif flag
+        @args << (arg = opt[(opt[1] == '-' ? 2 : 1)..-1]) && flag = false
+        @args << [flag = true] if @flags.include?(arg[0])
+      elsif flag || @args.empty?
         @tail << opt
       else
         @args << [opt] && flag = true
