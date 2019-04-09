@@ -1,4 +1,4 @@
-# Command-line option analysis for mruby <br> [![Build Status](https://travis-ci.org/katzer/mruby-tiny-opt-parser.svg?branch=master)](https://travis-ci.org/katzer/mruby-tiny-opt-parser) [![Maintainability](https://api.codeclimate.com/v1/badges/7d8bb5bc18ad8da8c3fc/maintainability)](https://codeclimate.com/github/katzer/mruby-tiny-opt-parser/maintainability)
+# Command-line option analysis for mruby <br> [![Build Status](https://travis-ci.com/katzer/mruby-tiny-opt-parser.svg?branch=master)](https://travis-ci.com/katzer/mruby-tiny-opt-parser) [![Maintainability](https://api.codeclimate.com/v1/badges/7d8bb5bc18ad8da8c3fc/maintainability)](https://codeclimate.com/github/katzer/mruby-tiny-opt-parser/maintainability)
 
 Tiny option parser for [mruby][mruby] with __zero__ dependencies.
 
@@ -66,7 +66,7 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/katzer
 
 The mgem is available as open source under the terms of the [MIT License][license].
 
-Made with :yum: from Leipzig
+Made with :yum: in Leipzig
 
 © 2018 [appPlant GmbH][appplant]
 
