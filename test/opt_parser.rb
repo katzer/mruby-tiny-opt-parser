@@ -34,7 +34,7 @@ end
 assert 'OptParser#opt_given?' do
   parser = OptParser.new
 
-  parser.parse(['--help', '-v'], true)
+  parser.parse(['--help', '-v'], ignore_unknown: true)
 
   assert_true  parser.opt_given? 'help'
   assert_true  parser.opt_given? 'h'
@@ -61,7 +61,7 @@ assert 'OptParser#unknown_opts' do
 
   parser = OptParser.new
   parser.add 'help'
-  parser.parse(['-?'], true)
+  parser.parse(['-?'], ignore_unknown: true)
   assert_include parser.unknown_opts, '?'
 
   parser = OptParser.new
@@ -72,7 +72,7 @@ end
 
 assert 'OptParser#opt_value' do
   parser = OptParser.new
-  parser.parse(['--port', '8000', '--ip', '0.0.0.0', '-v'], true)
+  parser.parse(['--port', '8000', '--ip', '0.0.0.0', '-v'], ignore_unknown: true)
 
   assert_equal '8000', parser.opt_value('port')
   assert_equal '8000', parser.opt_value('p')
@@ -89,7 +89,7 @@ assert 'OptParser#parse' do
 
   parser.on(:unknown) { |flags| opts = flags || [] }
 
-  parser.parse(['--port', '8000'], true)
+  parser.parse(['--port', '8000'], ignore_unknown: true)
   assert_nil opts
 
   parser.parse(['--port', '8000'])

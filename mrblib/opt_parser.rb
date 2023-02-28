@@ -76,7 +76,7 @@ class OptParser
   # @param [ Bool]           ignore_unknown
   #
   # @return [ Hash<String, Object> ]
-  def parse(args, ignore_unknown = false)
+  def parse(args, ignore_unknown: false)
     params = {}
 
     normalize_args(args)
