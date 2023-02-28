@@ -65,7 +65,7 @@ class OptParser
     on(opt, type, dval) do |val|
       if opt_given? opt.to_s
         puts yield(val)
-        exit
+        Kernel.method_defined?(:exit!) ? exit! : exit
       end
     end
   end
