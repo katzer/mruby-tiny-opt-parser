@@ -26,7 +26,7 @@ class OptParser
   #
   # @return [ OptParser ]
   def initialize
-    @flags, @opts, @tail = [], {}, []
+    @flags, @opts, @short_opts, @tail = [], {}, {}, []
 
     @unknown = ->(opts) { raise "unknown option: #{opts.join ', '}" }
 
@@ -40,19 +40,23 @@ class OptParser
 
   # Add a flag and a callback to invoke if flag is given later.
   #
-  # @param [ String ] flag The name of the option value.
-  #                        Possible values: object, string, int, float, bool
+  # @param [ String ] opt The name of the option value.
   # @param [ Symbol ] type The type of the option v
-  # @param [ Object ] dval The value to use if nothing else given.
+  #                        Possible values: object, string, int, float, bool
+  # @param [ Object ] default The value to use if nothing else given.
+  # @param [ String ] short The short name of the option value
   # @param [ Proc ]   blk  The callback to be invoked.
   #
   # @return [ Void ]
-  def on(opt, type = :object, dval = nil, &blk)
+  def on(opt, type = :object, default: nil, short: nil, &blk)
     if opt == :unknown
       @unknown = blk
     else
-      @opts[flag = opt.to_s] = [type, dval, blk]
-      @flags << flag[0] if type == :bool
+      flag = opt.to_s
+      short_flag = (short || flag[0]).to_s
+      @opts[flag] = [type, default, blk]
+      @short_opts[flag] = short_flag
+      @flags << short_flag if type == :bool
     end
   end
 
@@ -61,8 +65,8 @@ class OptParser
   # Same as `on` however is does exit after the block has been called.
   #
   # @return [ Void ]
-  def on!(opt, type = :object, dval = nil)
-    on(opt, type, dval) do |val|
+  def on!(opt, type = :object, default: nil, short: nil)
+    on(opt, type, default: default, short: short) do |val|
       if opt_given? opt.to_s
         puts yield(val)
         Kernel.method_defined?(:exit!) ? exit! : exit
@@ -73,7 +77,7 @@ class OptParser
   # Parse all given flags and invoke their callback.
   #
   # @param [ Array<String> ] args List of arguments to parse.
-  # @param [ Bool]           ignore_unknown
+  # @param [ Bool ]           ignore_unknown
   #
   # @return [ Hash<String, Object> ]
   def parse(args, ignore_unknown: false)
@@ -85,7 +89,7 @@ class OptParser
 
     @opts.each do |opt, opts|
       type, dval, blk    = opts
-      val                = opt_value(opt, type, dval)
+      val                = opt_value(opt, type, default: dval)
       params[opt.to_sym] = val unless val.nil?
 
       blk&.call(val)
@@ -99,7 +103,7 @@ class OptParser
   # @return [ Hash<String, Object> ]
   def opts
     params = {}
-    @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, *opts[0, 2]) }
+    @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, opts[0], default: opts[1]) }
     params
   end
 
@@ -116,11 +120,7 @@ class OptParser
   #
   # @return [ Boolean ]
   def valid_flag?(flag)
-    if flag.length == 1
-      @opts.keys.any? { |opt| opt[0] == flag[0] }
-    else
-      @opts.include?(flag)
-    end
+    @opts.include?(flag) || @short_opts.values.include?(flag)
   end
 
   # If the specified flag is given in args list.
@@ -142,22 +142,38 @@ class OptParser
   # Raises an error if the option has been specified but without an value.
   #
   # @param [ String ] opt  The option to look for.
-  # @param [ Object ] dval The default value to use for unless specified.
+  # @param [ Object ] default The default value to use for unless specified.
   #
   # @return [ Object ]
-  def opt_value(opt, type = :object, dval = nil)
+  def opt_value(opt, type = :object, default: nil)
     pos = @args.index(opt)
-    @args.each_index { |i| pos = i if !pos && opt[0] == @args[i][0] } unless pos
+    pos ||= @args.index(short_opt(opt))
     val = @args[pos + 1] if pos
 
     case val
     when Array then convert(val[0], type)
-    when nil   then pos && type == :bool ? true : dval
+    when nil   then pos && type == :bool ? true : default
     else convert(val, type)
     end
   end
 
+
   private
+
+  # Convert the value into the specified type.
+  # Raises an error for unknown type.
+  #
+  # @param [ String ] opt  The short flag to get the option for
+  #
+  # @return [ String ] The option
+  def short_opt(opt)
+    # This is a little backwards compared to the rest of the usage of
+    # `@short_opts` but we should only hit this branch if you call `#parse`
+    # without defining anything with `#on`.
+    @args.each { |arg| @short_opts[arg[0]] = arg } if @short_opts == {}
+
+    @short_opts[opt]
+  end
 
   # rubocop:disable CyclomaticComplexity
 
@@ -168,7 +184,7 @@ class OptParser
   # @param [ Symbol ] type The type to convert into.
   #                        Possible values: object, string, int, float, bool
   #
-  # @return [ Object] The converted value.
+  # @return [ Object ] The converted value.
   def convert(val, type)
     case type
     when :object then val
