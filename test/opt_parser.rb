@@ -97,7 +97,10 @@ assert 'OptParser#parse' do
   assert_equal ['port'], parser.unknown_opts
   assert_equal parser.unknown_opts, opts
 
-  parser.on(:port, :int, default: 80) { |p| port = p }
+  parser.on(:port, :int, default: 80, short: :p) { |p| port = p }
+  parser.parse([])
+  assert_equal 80, parser.opts[:port]
+
   parser.parse(['--port'])
   assert_equal 80, port
   parser.parse(['--port', '8080'])
@@ -109,9 +112,10 @@ assert 'OptParser#opts' do
   parser = OptParser.new
   parser.on(:port, :int, default: 80)
   parser.on(:version, :int, default: 1)
+  parser.on(:verbose, :bool, default: false, short: :e)
   parser.parse(['--port', '8000'])
 
-  assert_equal({ port: 8000, version: 1 }, parser.opts)
+  assert_equal({ port: 8000, version: 1, verbose: false }, parser.opts)
 end
 
 assert 'OptParser#opts with similar flags' do
