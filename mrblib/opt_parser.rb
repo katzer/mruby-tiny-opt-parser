@@ -43,18 +43,18 @@ class OptParser
   # @param [ String ] opt The name of the option value.
   # @param [ Symbol ] type The type of the option v
   #                        Possible values: object, string, int, float, bool
-  # @param [ Object ] default The value to use if nothing else given.
+  # @param [ Object ] dval The value to use if nothing else given.
   # @param [ String ] short The short name of the option value
   # @param [ Proc ]   blk  The callback to be invoked.
   #
   # @return [ Void ]
-  def on(opt, type = :object, default: nil, short: nil, &blk)
+  def on(opt, type = :object, dval: nil, short: nil, &blk)
     if opt == :unknown
       @unknown = blk
     else
       flag = opt.to_s
       short_flag = (short || flag[0]).to_s
-      @opts[flag] = [type, default, blk]
+      @opts[flag] = [type, dval, blk]
       @short_opts[flag] = short_flag
       @flags << short_flag if type == :bool
     end
@@ -65,8 +65,8 @@ class OptParser
   # Same as `on` however is does exit after the block has been called.
   #
   # @return [ Void ]
-  def on!(opt, type = :object, default: nil, short: nil)
-    on(opt, type, default: default, short: short) do |val|
+  def on!(opt, type = :object, dval: nil, short: nil)
+    on(opt, type, dval: dval, short: short) do |val|
       if opt_given? opt.to_s
         puts yield(val)
         Kernel.method_defined?(:exit!) ? exit! : exit
@@ -89,7 +89,7 @@ class OptParser
 
     @opts.each do |opt, opts|
       type, dval, blk    = opts
-      val                = opt_value(opt, type, default: dval)
+      val                = opt_value(opt, type, dval: dval)
       params[opt.to_sym] = val unless val.nil?
 
       blk&.call(val)
@@ -103,7 +103,7 @@ class OptParser
   # @return [ Hash<String, Object> ]
   def opts
     params = {}
-    @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, opts[0], default: opts[1]) }
+    @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, opts[0], dval: opts[1]) }
     params
   end
 
@@ -142,17 +142,17 @@ class OptParser
   # Raises an error if the option has been specified but without an value.
   #
   # @param [ String ] opt  The option to look for.
-  # @param [ Object ] default The default value to use for unless specified.
+  # @param [ Object ] dval The dval value to use for unless specified.
   #
   # @return [ Object ]
-  def opt_value(opt, type = :object, default: nil)
+  def opt_value(opt, type = :object, dval: nil)
     pos = @args.index(opt)
     pos ||= @args.index(short_opt(opt))
     val = @args[pos + 1] if pos
 
     case val
     when Array then convert(val[0], type)
-    when nil   then pos && type == :bool ? true : default
+    when nil   then pos && type == :bool ? true : dval
     else convert(val, type)
     end
   end
