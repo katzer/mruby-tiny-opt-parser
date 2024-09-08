@@ -48,7 +48,7 @@ class OptParser
   # @param [ Proc ]   blk  The callback to be invoked.
   #
   # @return [ Void ]
-  def on(opt, type = :object, dval: nil, short: nil, &blk)
+  def on(opt, type = :object, dval = nil, short: nil, &blk)
     if opt == :unknown
       @unknown = blk
     else
@@ -65,8 +65,8 @@ class OptParser
   # Same as `on` however is does exit after the block has been called.
   #
   # @return [ Void ]
-  def on!(opt, type = :object, dval: nil, short: nil)
-    on(opt, type, dval: dval, short: short) do |val|
+  def on!(opt, type = :object, dval = nil, short: nil)
+    on(opt, type, dval, short: short) do |val|
       if opt_given? opt.to_s
         puts yield(val)
         Kernel.method_defined?(:exit!) ? exit! : exit
@@ -89,7 +89,7 @@ class OptParser
 
     @opts.each do |opt, opts|
       type, dval, blk    = opts
-      val                = opt_value(opt, type, dval: dval)
+      val                = opt_value(opt, type, dval)
       params[opt.to_sym] = val unless val.nil?
 
       blk&.call(val)
@@ -103,7 +103,7 @@ class OptParser
   # @return [ Hash<String, Object> ]
   def opts
     params = {}
-    @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, opts[0], dval: opts[1]) }
+    @opts.each { |opt, opts| params[opt.to_sym] = opt_value(opt, opts[0], opts[1]) }
     params
   end
 
@@ -145,7 +145,7 @@ class OptParser
   # @param [ Object ] dval The dval value to use for unless specified.
   #
   # @return [ Object ]
-  def opt_value(opt, type = :object, dval: nil)
+  def opt_value(opt, type = :object, dval = nil)
     pos = @args.index(opt)
     pos ||= @args.index(short_opt(opt))
     val = @args[pos + 1] if pos
