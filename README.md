@@ -5,12 +5,13 @@ Tiny option parser for [mruby][mruby] with __zero__ dependencies.
 ```ruby
 parser = OptParser.new do |opts|
   opts.on(:port, :int, 80) { |port| ... }
+  opts.on(:parallel, :bool, false, short: :a)
   opts.on(:ip, :string, '127.0.0.1') { |ip| ... }
 end
 
-parser.parse(['--port', '8000', 'losthost', 'otherhost'])
+parser.parse(['--port', '8000', '-a', 'losthost', 'otherhost'])
 
-parser.opts # => { port: 8000, ip: '127.0.0.1' }
+parser.opts # => { port: 8000, parallel: true, ip: '127.0.0.1' }
 parser.tail # => ['losthost', 'otherhost']
 ```
 
